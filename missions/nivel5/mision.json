@@ -1,0 +1,41 @@
+{
+  "level": 5,
+  "title": "Organización de Archivos",
+  "subtitle": "Copia y mueve archivos como un profesional",
+  "description": "Un buen agente mantiene sus archivos organizados.\n\n📚 COMANDO: cp (Copy - Copiar)\nCrea una copia de un archivo, como fotocopiar un documento.\n\nEjemplos:\n• cp archivo.txt copia.txt → Copiar archivo\n• cp -r carpeta carpeta2 → Copiar carpeta completa\n\n📚 COMANDO: mv (Move - Mover/Renombrar)\nMueve archivos a otra carpeta o les cambia el nombre.\n\nEjemplos:\n• mv archivo.txt otra_carpeta/ → Mover\n• mv viejo.txt nuevo.txt → Renombrar\n\n📚 COMANDO: mkdir (Make Directory - Crear Carpeta)\nCrea nuevas carpetas para organizar.\n\nEjemplo:\n• mkdir mi_carpeta → Crear carpeta nueva",
+  "xp_reward": 80,
+  "objectives": [
+    {
+      "id": "obj1",
+      "description": "Copia 'importante.txt' a 'backup.txt'",
+      "hint": "Usa: cp importante.txt backup.txt",
+      "validation": "file_exists:backup.txt",
+      "xp": 20
+    },
+    {
+      "id": "obj2",
+      "description": "Crea una carpeta llamada 'organizados'",
+      "hint": "Usa: mkdir organizados",
+      "validation": "dir_exists:organizados",
+      "xp": 15
+    },
+    {
+      "id": "obj3",
+      "description": "Mueve 'temporal.txt' a la carpeta 'organizados'",
+      "hint": "Usa: mv temporal.txt organizados/",
+      "validation": "file_exists:organizados/temporal.txt",
+      "xp": 20
+    },
+    {
+      "id": "obj4",
+      "description": "Renombra 'viejo.txt' a 'nuevo.txt'",
+      "hint": "Usa: mv viejo.txt nuevo.txt",
+      "validation": "file_exists:nuevo.txt && file_not_exists:viejo.txt",
+      "xp": 25
+    }
+  ],
+  "commands_taught": ["cp", "mv", "mkdir"],
+  "estimated_time": 18,
+  "difficulty": "intermediate",
+  "badge_reward": "📁 Organizador"
+}

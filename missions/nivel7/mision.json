@@ -1,0 +1,42 @@
+{
+  "level": 7,
+  "title": "Scripting Básico",
+  "subtitle": "Crea tus propios programas",
+  "description": "¡El nivel final! Aprende a crear scripts que automatizan tareas.\n\n📚 SCRIPT: Archivo de Comandos Automatizados\nUn script es como una receta: lista de pasos que la computadora sigue automáticamente.\n\n📚 COMANDO: touch (Crear Archivo Vacío)\nCrea archivos nuevos sin contenido.\n\nEjemplo:\n• touch archivo.txt → Crear archivo vacío\n\n📚 COMANDO: echo (Imprimir/Escribir)\nMuestra texto en pantalla o lo guarda en archivos.\n\nEjemplos:\n• echo 'Hola' → Mostrar 'Hola'\n• echo 'Texto' > archivo.txt → Guardar en archivo\n\n📚 COMANDO: chmod (Dar Permisos)\nPermite que un archivo pueda ejecutarse como programa.\n\nEjemplo:\n• chmod +x script.sh → Hacer ejecutable",
+  "xp_reward": 150,
+  "objectives": [
+    {
+      "id": "obj1",
+      "description": "Crea un archivo llamado 'mi_script.sh'",
+      "hint": "Usa: nano mi_script.sh o touch mi_script.sh",
+      "validation": "file_exists:mi_script.sh",
+      "xp": 30
+    },
+    {
+      "id": "obj2",
+      "description": "Dale permisos de ejecución al script",
+      "hint": "Usa: chmod +x mi_script.sh",
+      "validation": "file_executable:mi_script.sh",
+      "xp": 40
+    },
+    {
+      "id": "obj3",
+      "description": "Crea un script que diga '¡Hola Mundo!'",
+      "hint": "El script debe contener: #!/bin/bash y echo '¡Hola Mundo!'",
+      "validation": "script_contains:echo",
+      "xp": 40
+    },
+    {
+      "id": "obj4",
+      "description": "Ejecuta tu script",
+      "hint": "Usa: ./mi_script.sh",
+      "validation": "command_executed:./mi_script.sh",
+      "xp": 40
+    }
+  ],
+  "commands_taught": ["nano", "chmod", "bash", "scripting"],
+  "estimated_time": 25,
+  "difficulty": "advanced",
+  "badge_reward": "📜 Scripter",
+  "completion_message": "¡FELICITACIONES! Has completado todos los niveles de NEA Shell. Eres oficialmente un Maestro de la Terminal. 🎓"
+}

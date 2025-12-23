@@ -1,0 +1,3 @@
+*.log
+students/
+.DS_Store

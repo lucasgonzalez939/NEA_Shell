@@ -1,0 +1,42 @@
+{
+  "level": 6,
+  "title": "Eliminación Responsable",
+  "subtitle": "Aprende a eliminar archivos con cuidado",
+  "description": "⚠️ IMPORTANTE: Estos comandos eliminan PERMANENTEMENTE. ¡No hay papelera de reciclaje!\n\n📚 COMANDO: rm (Remove - Borrar)\nElimina archivos para siempre. ¡MUCHO CUIDADO!\n\nEjemplos:\n• rm archivo.txt → Borrar archivo\n• rm -i archivo.txt → Preguntar antes de borrar\n• rm *.txt → Borrar todos los .txt (¡PELIGROSO!)\n\n📚 COMANDO: rmdir (Remove Directory - Borrar Carpeta Vacía)\nBorra carpetas que estén vacías.\n\nEjemplo:\n• rmdir carpeta_vacia → Borrar carpeta vacía\n\n⚡ REGLA DE ORO: Siempre usa 'ls' antes de 'rm' para verificar qué vas a borrar.",
+  "xp_reward": 90,
+  "objectives": [
+    {
+      "id": "obj1",
+      "description": "Elimina el archivo 'basura.txt'",
+      "hint": "Usa: rm basura.txt",
+      "validation": "file_not_exists:basura.txt",
+      "xp": 20
+    },
+    {
+      "id": "obj2",
+      "description": "Lista archivos para confirmar la eliminación",
+      "hint": "Usa: ls para verificar",
+      "validation": "command_executed:ls",
+      "xp": 10
+    },
+    {
+      "id": "obj3",
+      "description": "Elimina una carpeta vacía con rmdir",
+      "hint": "Usa: rmdir carpeta_vacia",
+      "validation": "dir_not_exists:carpeta_vacia",
+      "xp": 25
+    },
+    {
+      "id": "obj4",
+      "description": "Elimina 'obsoleto.txt' usando rm con confirmación",
+      "hint": "Usa: rm -i obsoleto.txt (la 'i' pregunta antes de borrar)",
+      "validation": "file_not_exists:obsoleto.txt",
+      "xp": 35
+    }
+  ],
+  "commands_taught": ["rm", "rm -i", "rmdir"],
+  "estimated_time": 15,
+  "difficulty": "intermediate",
+  "badge_reward": "⚠️ Cuidadoso",
+  "warning": "Este nivel requiere precaución. Lee bien cada objetivo antes de ejecutar comandos."
+}

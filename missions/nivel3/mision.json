@@ -1,0 +1,41 @@
+{
+  "level": 3,
+  "title": "Extensiones y Comodines",
+  "subtitle": "Trabaja con tipos de archivos",
+  "description": "Los archivos tienen extensiones que indican su tipo (.txt, .jpg, .sh).\n\n📚 COMODINES: * (Asterisco - Cualquier cosa)\nComo un 'joker' que representa cualquier texto.\n\nEjemplos:\n• ls *.txt → Ver solo archivos de texto\n• ls foto* → Ver todo lo que empiece con 'foto'\n• ls *2024* → Ver todo lo que contenga '2024'\n\n📚 COMANDO: file (Identificar)\nTe dice qué tipo de archivo es realmente.",
+  "xp_reward": 60,
+  "objectives": [
+    {
+      "id": "obj1",
+      "description": "Lista solo los archivos .txt",
+      "hint": "Usa: ls *.txt",
+      "validation": "command_executed:ls *.txt",
+      "xp": 15
+    },
+    {
+      "id": "obj2",
+      "description": "Lista archivos que empiecen con 'doc'",
+      "hint": "Usa: ls doc*",
+      "validation": "command_executed:ls doc*",
+      "xp": 15
+    },
+    {
+      "id": "obj3",
+      "description": "Usa 'file' para identificar el tipo de 'misterio'",
+      "hint": "Usa: file misterio",
+      "validation": "command_executed:file",
+      "xp": 15
+    },
+    {
+      "id": "obj4",
+      "description": "Lista todos los archivos de imagen (*.jpg *.png)",
+      "hint": "Usa: ls *.jpg *.png",
+      "validation": "command_executed:ls *.jpg *.png",
+      "xp": 15
+    }
+  ],
+  "commands_taught": ["file", "comodines"],
+  "estimated_time": 12,
+  "difficulty": "beginner",
+  "badge_reward": "🔍 Explorador"
+}

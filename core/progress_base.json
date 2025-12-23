@@ -1,0 +1,36 @@
+{
+  "name": "",
+  "grade": "",
+  "student_id": "",
+  "level": 1,
+  "xp": 0,
+  "badges": [],
+  "unlocked_commands": ["cd", "ls", "pwd"],
+  "missions_completed": [],
+  "current_mission": null,
+  "stats": {
+    "total_commands": 0,
+    "missions_attempted": 0,
+    "missions_completed": 0,
+    "hints_used": 0,
+    "perfect_missions": 0,
+    "login_count": 0,
+    "total_time_minutes": 0
+  },
+  "achievements": {
+    "first_login": false,
+    "first_mission": false,
+    "level_2_reached": false,
+    "level_3_reached": false,
+    "level_4_reached": false,
+    "level_5_reached": false,
+    "level_6_reached": false,
+    "level_7_reached": false,
+    "speed_demon": false,
+    "perfectionist": false,
+    "persistent": false
+  },
+  "last_login": "",
+  "created_at": "",
+  "version": "3.0"
+}

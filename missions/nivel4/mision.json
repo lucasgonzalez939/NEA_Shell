@@ -1,0 +1,41 @@
+{
+  "level": 4,
+  "title": "Lectura de Datos",
+  "subtitle": "Lee y busca información en archivos",
+  "description": "La terminal te permite leer archivos sin abrirlos en un editor.\n\n📚 COMANDO: cat (Concatenate - Ver/Mostrar)\nMuestra el contenido de archivos de texto, como abrir un libro.\n\nEjemplos:\n• cat archivo.txt → Ver contenido\n• cat file1.txt file2.txt → Ver varios archivos\n\n📚 COMANDO: grep (Buscar)\nBusca palabras dentro de archivos, como Ctrl+F.\n\nEjemplos:\n• grep palabra archivo.txt → Buscar 'palabra'\n• grep -r texto . → Buscar en todas las carpetas",
+  "xp_reward": 70,
+  "objectives": [
+    {
+      "id": "obj1",
+      "description": "Lee el contenido de 'mensaje.txt'",
+      "hint": "Usa: cat mensaje.txt",
+      "validation": "command_executed:cat mensaje.txt",
+      "xp": 15
+    },
+    {
+      "id": "obj2",
+      "description": "Busca la palabra 'clave' en 'documento.txt'",
+      "hint": "Usa: grep clave documento.txt",
+      "validation": "command_executed:grep",
+      "xp": 20
+    },
+    {
+      "id": "obj3",
+      "description": "Lee múltiples archivos con cat",
+      "hint": "Usa: cat archivo1.txt archivo2.txt",
+      "validation": "command_executed:cat .* .*",
+      "xp": 15
+    },
+    {
+      "id": "obj4",
+      "description": "Busca archivos que contengan 'password'",
+      "hint": "Usa: grep -r password .",
+      "validation": "command_executed:grep -r",
+      "xp": 20
+    }
+  ],
+  "commands_taught": ["cat", "grep", "grep -r"],
+  "estimated_time": 15,
+  "difficulty": "intermediate",
+  "badge_reward": "📖 Lector"
+}

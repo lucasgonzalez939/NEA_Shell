@@ -1,0 +1,41 @@
+{
+  "level": 1,
+  "title": "Navegación Básica",
+  "subtitle": "Aprende a moverte por el sistema de archivos",
+  "description": "Tu primera misión como agente es aprender a navegar por las carpetas del sistema.\n\n📚 COMANDO: cd (Change Directory - Cambiar de Carpeta)\nPermite moverte entre carpetas, como si caminaras entre habitaciones.\n\nEjemplos:\n• cd nombre_carpeta → Entrar a una carpeta\n• cd .. → Volver a la carpeta anterior\n• cd ~ → Ir a tu carpeta personal",
+  "xp_reward": 50,
+  "objectives": [
+    {
+      "id": "obj1",
+      "description": "Navega a la carpeta 'mision1'",
+      "hint": "Usa: cd mision1",
+      "validation": "pwd_contains:mision1",
+      "xp": 15
+    },
+    {
+      "id": "obj2",
+      "description": "Entra a la subcarpeta 'secretos'",
+      "hint": "Usa: cd secretos",
+      "validation": "pwd_contains:secretos",
+      "xp": 15
+    },
+    {
+      "id": "obj3",
+      "description": "Vuelve al directorio anterior",
+      "hint": "Usa: cd ..",
+      "validation": "pwd_not_contains:secretos",
+      "xp": 10
+    },
+    {
+      "id": "obj4",
+      "description": "Ve directamente a tu carpeta personal",
+      "hint": "Usa: cd ~",
+      "validation": "pwd_equals:$HOME",
+      "xp": 10
+    }
+  ],
+  "commands_taught": ["cd", "pwd"],
+  "estimated_time": 10,
+  "difficulty": "beginner",
+  "badge_reward": "🐣 Primeros Pasos"
+}

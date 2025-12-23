@@ -1,0 +1,41 @@
+{
+  "level": 2,
+  "title": "Exploración del Sistema",
+  "subtitle": "Descubre qué hay en cada directorio",
+  "description": "Ahora que sabes moverte, es hora de aprender a ver qué contiene cada carpeta.\n\n📚 COMANDO: ls (List - Listar)\nMuestra todos los archivos y carpetas, como ver el contenido de una mochila.\n\nEjemplos:\n• ls → Ver archivos normales\n• ls -l → Ver con detalles (tamaño, fecha)\n• ls -a → Ver TODO (incluso archivos ocultos)\n• ls -la → Combinar ambas opciones",
+  "xp_reward": 50,
+  "objectives": [
+    {
+      "id": "obj1",
+      "description": "Lista los archivos de la carpeta actual",
+      "hint": "Usa: ls",
+      "validation": "command_executed:ls",
+      "xp": 10
+    },
+    {
+      "id": "obj2",
+      "description": "Lista archivos con detalles (permisos, tamaño, fecha)",
+      "hint": "Usa: ls -l",
+      "validation": "command_executed:ls -l",
+      "xp": 15
+    },
+    {
+      "id": "obj3",
+      "description": "Lista archivos incluyendo los ocultos",
+      "hint": "Usa: ls -a (la 'a' es de 'all')",
+      "validation": "command_executed:ls -a",
+      "xp": 15
+    },
+    {
+      "id": "obj4",
+      "description": "Navega a 'mision2' y lista su contenido",
+      "hint": "Usa: cd mision2 y luego ls",
+      "validation": "command_executed:ls && pwd_contains:mision2",
+      "xp": 10
+    }
+  ],
+  "commands_taught": ["ls", "ls -l", "ls -a"],
+  "estimated_time": 10,
+  "difficulty": "beginner",
+  "badge_reward": "🧭 Navegante"
+}
