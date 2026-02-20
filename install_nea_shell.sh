@@ -142,7 +142,17 @@ fi
 # Marcar paso como completado
 mark_completed() {
     COMPLETED_STEPS["$1"]="done"
+    # Evitar duplicados
+    grep -v "^$1=" "$STATE_FILE" > "${STATE_FILE}.tmp" 2>/dev/null || true
+    mv "${STATE_FILE}.tmp" "$STATE_FILE" 2>/dev/null || true
     echo "$1=done" >> "$STATE_FILE"
+}
+
+# Desmarcar paso (para re-ejecución)
+unmark_step() {
+    unset COMPLETED_STEPS["$1"]
+    grep -v "^$1=" "$STATE_FILE" > "${STATE_FILE}.tmp" 2>/dev/null || true
+    mv "${STATE_FILE}.tmp" "$STATE_FILE" 2>/dev/null || true
 }
 
 # Verificar si un paso está completado
@@ -176,68 +186,123 @@ echo ""
 
 # Verificar estado previo de instalación
 if [ -f "$STATE_FILE" ]; then
-    log_info "Detectada instalación previa. Cargando estado..."
+    log_info "Detectada instalación previa."
+    echo ""
+    
+    # Mostrar menú de selección de pasos
+    echo "Seleccione qué pasos desea ejecutar:"
+    echo ""
+    echo "  1) Ejecutar todos los pasos pendientes (continuar instalación)"
+    echo "  2) Re-ejecutar pasos específicos"
+    echo "  3) Empezar desde cero (borrar estado y re-instalar todo)"
+    echo "  4) Salir"
+    echo ""
+    read -r -p "Seleccione una opción [1-4]: " MENU_CHOICE
+    
+    case $MENU_CHOICE in
+        2)
+            echo ""
+            echo "Seleccione los pasos a re-ejecutar (separados por espacios):"
+            echo ""
+            echo "  0) Pre-requisitos"
+            echo "  1) Dependencias"
+            echo "  2) Repositorio"
+            echo "  3) Usuarios y contraseñas"
+            echo "  4) Servicio auto-update"
+            echo "  5) Sincronización de datos"
+            echo "  6) Finalización"
+            echo ""
+            read -r -p "Números de pasos (ej: 3 5): " -a STEPS_TO_RERUN
+            
+            # Desmarcar los pasos seleccionados
+            for step_num in "${STEPS_TO_RERUN[@]}"; do
+                case $step_num in
+                    0) unmark_step "prerequisites"; unmark_step "pkg_index_updated" ;;
+                    1) unmark_step "dependencies" ;;
+                    2) unmark_step "repository" ;;
+                    3) unmark_step "users" ;;
+                    4) unmark_step "autoupdate" ;;
+                    5) unmark_step "sync" ;;
+                    6) unmark_step "finalize" ;;
+                esac
+            done
+            
+            echo ""
+            log_success "Pasos seleccionados se ejecutarán nuevamente"
+            sleep 2
+            ;;
+        3)
+            echo ""
+            log_warning "Esto borrará todo el estado de instalación."
+            if ask_yes_no "¿Está seguro?" "n"; then
+                rm -f "$STATE_FILE"
+                declare -A COMPLETED_STEPS=()
+                log_success "Estado borrado. Iniciando instalación completa..."
+                sleep 2
+            else
+                log_info "Operación cancelada"
+                exit 0
+            fi
+            ;;
+        4)
+            log_info "Saliendo..."
+            exit 0
+            ;;
+        1|*)
+            log_info "Continuando instalación..."
+            ;;
+    esac
     echo ""
 fi
 
-# ==============================================================================
-# PASO 0: PRE-REQUISITOS DEL SISTEMA
-# ==============================================================================
-if is_completed "prerequisites"; then
-    log_success "[0/6] Pre-requisitos ya verificados (omitiendo)"
-else
+# Verificar que git está disponible (prerequisito para obtener el script)
+if ! command -v git &>/dev/null; then
+    log_error "Git no está instalado."
+    log_error "Git es necesario para clonar el repositorio de NEA Shell."
     echo ""
-    log_info "[0/6] Verificando pre-requisitos del sistema..."
-    
-    # Verificar que git está disponible (prerequisito para obtener el script)
-    if ! command -v git &>/dev/null; then
-        log_error "Git no está instalado."
-        log_error "Git es necesario para clonar el repositorio de NEA Shell."
-        echo ""
-        log_info "Para instalar git, ejecuta como root:"
-        echo "  apt update && apt install -y git"
-        echo ""
-        log_info "Luego vuelve a ejecutar este script."
-        exit 1
-    fi
-    
-    log_success "Git detectado: $(git --version)"
-    
-    # Verificar internet
-    check_internet
-    
-    # Actualizar índice de paquetes
-    update_package_index
-    
-    # Lista de paquetes esenciales (sin git, ya es prerequisito)
-    declare -A ESSENTIAL_PACKAGES=(
-        ["curl"]="Herramienta de transferencia de datos"
-        ["wget"]="Descargador de archivos"
-        ["openssl"]="Herramientas criptográficas"
-        ["sudo"]="Ejecutar comandos con privilegios"
-    )
-    
-    log_info "Instalando herramientas esenciales..."
-    
-    for package in "${!ESSENTIAL_PACKAGES[@]}"; do
-        ensure_package "$package" "${ESSENTIAL_PACKAGES[$package]}"
-    done
-    
-    # Verificar que el usuario que invocó sudo existe
-    if [ -n "$SUDO_USER" ]; then
-        log_info "Configurando sudo para usuario: $SUDO_USER"
-        
-        # Agregar usuario al grupo sudo si no está
-        if ! groups "$SUDO_USER" | grep -q sudo; then
-            usermod -aG sudo "$SUDO_USER"
-            log_success "Usuario $SUDO_USER agregado al grupo sudo"
-            log_warning "Nota: Necesitarás cerrar sesión y volver a iniciar para que los cambios surtan efecto"
-        fi
-    fi
-    
-    mark_completed "prerequisites"
-    log_success "Pre-requisitos verificados e instalados"
+    log_info "Para instalar git, ejecuta como root:"
+    echo "  apt update && apt install -y git"
+    echo ""
+    log_info "Luego vuelve a ejecutar este script."
+    exit 1
 fi
+
+log_success "Git detectado: $(git --version)"
+
+# Verificar internet
+check_internet
+
+# Actualizar índice de paquetes
+update_package_index
+
+# Lista de paquetes esenciales (sin git, ya es prerequisito)
+declare -A ESSENTIAL_PACKAGES=(
+    ["curl"]="Herramienta de transferencia de datos"
+    ["wget"]="Descargador de archivos"
+    ["openssl"]="Herramientas criptográficas"
+    ["sudo"]="Ejecutar comandos con privilegios"
+)
+
+log_info "Instalando herramientas esenciales..."
+
+for package in "${!ESSENTIAL_PACKAGES[@]}"; do
+    ensure_package "$package" "${ESSENTIAL_PACKAGES[$package]}"
+done
+
+# Verificar que el usuario que invocó sudo existe
+if [ -n "$SUDO_USER" ]; then
+    log_info "Configurando sudo para usuario: $SUDO_USER"
+    
+    # Agregar usuario al grupo sudo si no está
+    if ! groups "$SUDO_USER" | grep -q sudo; then
+        usermod -aG sudo "$SUDO_USER"
+        log_success "Usuario $SUDO_USER agregado al grupo sudo"
+        log_warning "Nota: Necesitarás cerrar sesión y volver a iniciar para que los cambios surtan efecto"
+    fi
+fi
+
+mark_completed "prerequisites"
+log_success "Pre-requisitos verificados e instalados"
 
 # ==============================================================================
 # PASO 1: DEPENDENCIAS
@@ -359,34 +424,54 @@ else
     # Verificar si el archivo de contraseñas existe
     if [ -f "$PASSWORD_FILE" ]; then
         log_warning "Archivo de contraseñas existente encontrado"
-        if ask_yes_no "¿Desea sobrescribirlo?" "n"; then
+        if ask_yes_no "¿Desea regenerar las contraseñas?" "n"; then
             echo "=== CONTRASEÑAS DE NEA SHELL ===" > "$PASSWORD_FILE"
             echo "Regeneradas el: $(date)" >> "$PASSWORD_FILE"
             echo "----------------------------------------" >> "$PASSWORD_FILE"
+            REGENERATE_PASSWORDS=true
         else
-            log_info "Usando archivo de contraseñas existente"
+            log_info "Manteniendo contraseñas existentes"
+            REGENERATE_PASSWORDS=false
         fi
     else
         echo "=== CONTRASEÑAS DE NEA SHELL ===" > "$PASSWORD_FILE"
         echo "Generadas el: $(date)" >> "$PASSWORD_FILE"
         echo "----------------------------------------" >> "$PASSWORD_FILE"
+        REGENERATE_PASSWORDS=true
     fi
     
     for GRADE in "${GRADES[@]}"; do
         USERNAME="grado_$GRADE"
         
         if id "$USERNAME" &>/dev/null; then
-            log_info "Usuario $USERNAME ya existe (omitiendo creación)"
-        else
-            # Generar contraseña aleatoria de 12 caracteres
-            PASS=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 12)
+            log_info "Usuario $USERNAME ya existe"
             
+            # Si regeneramos passwords, actualizar REALMENTE la contraseña del sistema
+            if [ "$REGENERATE_PASSWORDS" = true ]; then
+                PASS=$(openssl rand -base64 9 | tr -dc 'a-zA-Z0-9' | head -c 6)
+                
+                # Cambiar contraseña del sistema
+                echo "$USERNAME:$PASS" | chpasswd
+                
+                # Guardar en archivo
+                echo "$USERNAME -> $PASS" >> "$PASSWORD_FILE"
+                log_success "Contraseña actualizada para $USERNAME: $PASS"
+            else
+                log_info "Contraseña de $USERNAME no modificada"
+            fi
+        else
+            # Generar contraseña aleatoria de 6 caracteres (letras y números)
+            PASS=$(openssl rand -base64 9 | tr -dc 'a-zA-Z0-9' | head -c 6)
+            
+            # Crear usuario
             useradd -m -s /bin/bash "$USERNAME"
+            
+            # Establecer contraseña
             echo "$USERNAME:$PASS" | chpasswd
             
             # Guardar en archivo seguro
             echo "$USERNAME -> $PASS" >> "$PASSWORD_FILE"
-            log_success "Usuario $USERNAME creado con contraseña segura"
+            log_success "Usuario $USERNAME creado con contraseña: $PASS"
         fi
         
         # Auto-login al portal NEA Shell
