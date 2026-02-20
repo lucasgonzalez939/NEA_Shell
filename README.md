@@ -99,6 +99,37 @@ sudo ./install_nea_shell.sh
 
 ---
 
+## Instalación
+
+### Instalación Completa
+
+```bash
+sudo bash install_nea_shell.sh
+```
+
+El script es interactivo y te guiará por el proceso. Características:
+
+- ✅ **Reanudable**: Si falla, vuelve a ejecutarlo y continuará desde donde quedó
+- ✅ **Seguro**: No recrea usuarios ni sobrescribe configuraciones existentes
+- ✅ **Interactivo**: Opciones para Syncthing, NFS o ninguno
+
+### Opciones de Sincronización
+
+#### Opción 1: Syncthing (Recomendado para P2P)
+- Sincronización automática entre múltiples nodos
+- Requiere configuración manual del Web UI
+- Acceso: http://localhost:8384
+
+#### Opción 2: NFS (Recomendado para servidor central)
+- Cliente de carpeta compartida en red
+- Requiere servidor NFS configurado
+- Montaje automático en `/mnt/nea_shared`
+
+#### Opción 3: Sin sincronización
+- Configuración manual posterior
+
+---
+
 ##  Mantenimiento (Para el Docente)
 
 Para añadir una nueva misión o corregir un script:
@@ -215,6 +246,51 @@ El sistema ahora genera contraseñas aleatorias automáticamente. Si ves este er
 
 ```bash
 sudo apt install openssl
+```
+
+#### Reinstalar completamente
+```bash
+sudo rm /var/lib/nea_shell_install_state
+sudo bash install_nea_shell.sh
+```
+
+#### Ver estado de instalación
+```bash
+cat /var/lib/nea_shell_install_state
+```
+
+#### Configurar solo la sincronización
+```bash
+# Marca pasos previos como completos y ejecuta solo sync
+echo "dependencies=done" | sudo tee /var/lib/nea_shell_install_state
+echo "repository=done" | sudo tee -a /var/lib/nea_shell_install_state
+echo "users=done" | sudo tee -a /var/lib/nea_shell_install_state
+echo "autoupdate=done" | sudo tee -a /var/lib/nea_shell_install_state
+sudo bash install_nea_shell.sh
+```
+
+#### Problemas con NFS
+```bash
+# Verificar que el servidor NFS exporta correctamente
+showmount -e <IP_DEL_SERVIDOR>
+
+# Montar manualmente
+sudo mount <IP_DEL_SERVIDOR>:/export/nea_data /mnt/nea_shared
+
+# Ver logs de montaje
+dmesg | grep -i nfs
+```
+
+#### Problemas con Syncthing
+```bash
+# Ver logs del servicio
+sudo journalctl -u syncthing@neahost -n 50
+
+# Reiniciar servicio
+sudo systemctl restart syncthing@neahost
+
+# Verificar estado
+sudo systemctl status syncthing@neahost
 ```
 
 ---

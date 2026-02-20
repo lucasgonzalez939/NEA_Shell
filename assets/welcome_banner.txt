@@ -1,0 +1,29 @@
+
+    ███╗   ██╗███████╗ █████╗     ███████╗██╗  ██╗███████╗██╗     ██╗     
+    ████╗  ██║██╔════╝██╔══██╗    ██╔════╝██║  ██║██╔════╝██║     ██║     
+    ██╔██╗ ██║█████╗  ███████║    ███████╗███████║█████╗  ██║     ██║     
+    ██║╚██╗██║██╔══╝  ██╔══██║    ╚════██║██╔══██║██╔══╝  ██║     ██║     
+    ██║ ╚████║███████╗██║  ██║    ███████║██║  ██║███████╗███████╗███████╗
+    ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝    ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
+                                                                          
+    ════════════════════════════════════════════════════════════════════════
+              🚀 SISTEMA DE ENTRENAMIENTO EN TERMINAL 🚀
+    ════════════════════════════════════════════════════════════════════════
+
+    👋 ¡Hola, Agente!
+
+    📖 INSTRUCCIONES PARA INGRESAR:
+
+       1️⃣  Tu usuario es: grado_1ro (o 2do, 3ro, etc. según tu grado)
+       2️⃣  La contraseña te la dará tu profesor/a
+       3️⃣  Escribe tu usuario y presiona ENTER
+       4️⃣  Escribe tu contraseña y presiona ENTER
+           (No verás lo que escribes, ¡es secreto! 🤫)
+
+    💡 CONSEJOS:
+       • Lee todo con atención
+       • Escribe exactamente lo que ves
+       • Si te equivocas, vuelve a intentar
+       • ¡Diviértete aprendiendo!
+
+    ════════════════════════════════════════════════════════════════════════
