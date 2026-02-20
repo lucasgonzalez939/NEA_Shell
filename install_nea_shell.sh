@@ -93,7 +93,20 @@ EOF
 systemctl daemon-reload
 systemctl enable nea-sync.service
 
-echo "=== INSTALACIÓN DE NEA Shell COMPLETADA ==="
-
 echo "--- [5/6] Configurando sincronización de datos (Syncthing)..."
-bash "$REPO_DIR/scripts/nea_syncthing.sh"
+if bash "$REPO_DIR/scripts/nea_syncthing.sh"; then
+    echo "  ✓ Syncthing configurado correctamente"
+else
+    echo "  ⚠ Hubo problemas configurando Syncthing"
+    echo "  ℹ Revisa los logs: journalctl -u syncthing@neahost -n 50"
+    echo "  ℹ Puedes ejecutar manualmente: sudo bash $REPO_DIR/scripts/nea_syncthing.sh"
+fi
+
+echo ""
+echo "=== INSTALACIÓN DE NEA Shell COMPLETADA ==="
+echo ""
+echo "📋 Próximos pasos:"
+echo "  1. Revisa las contraseñas en: /root/nea_passwords.txt"
+echo "  2. Accede a Syncthing Web UI: http://localhost:8384"
+echo "  3. Conecta con otros nodos NEA usando los Device IDs"
+echo ""
