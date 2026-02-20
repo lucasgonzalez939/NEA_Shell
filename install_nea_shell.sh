@@ -194,10 +194,11 @@ if [ -f "$STATE_FILE" ]; then
     echo ""
     echo "  1) Ejecutar todos los pasos pendientes (continuar instalación)"
     echo "  2) Re-ejecutar pasos específicos"
-    echo "  3) Empezar desde cero (borrar estado y re-instalar todo)"
-    echo "  4) Salir"
+    echo "  3) Actualizar repositorio y recrear symlinks"
+    echo "  4) Empezar desde cero (borrar estado y re-instalar todo)"
+    echo "  5) Salir"
     echo ""
-    read -r -p "Seleccione una opción [1-4]: " MENU_CHOICE
+    read -r -p "Seleccione una opción [1-5]: " MENU_CHOICE
     
     case $MENU_CHOICE in
         2)
@@ -232,6 +233,120 @@ if [ -f "$STATE_FILE" ]; then
             sleep 2
             ;;
         3)
+            # Actualizar repositorio y recrear symlinks
+            echo ""
+            log_info "Actualizando repositorio NEA Shell..."
+            
+            if [ -d "$REPO_DIR" ]; then
+                cd "$REPO_DIR"
+                
+                # Guardar estado actual
+                log_info "Guardando estado actual del repositorio..."
+                git status > /tmp/nea_repo_status.txt 2>&1
+                
+                # Actualizar desde GitHub
+                log_info "Descargando últimos cambios desde GitHub..."
+                if git pull origin main 2>/dev/null || git pull origin master 2>/dev/null; then
+                    log_success "Repositorio actualizado correctamente"
+                else
+                    log_warning "No se pudo actualizar automáticamente"
+                    
+                    if ask_yes_no "¿Desea forzar actualización (perderá cambios locales)?" "n"; then
+                        git fetch origin
+                        git reset --hard origin/main 2>/dev/null || git reset --hard origin/master 2>/dev/null
+                        log_success "Repositorio actualizado forzosamente"
+                    else
+                        log_info "Actualización cancelada"
+                    fi
+                fi
+                
+                # Hacer ejecutables todos los scripts
+                log_info "Configurando permisos de scripts..."
+                chmod +x "$REPO_DIR"/*.sh 2>/dev/null || true
+                chmod +x "$REPO_DIR/scripts"/*.sh 2>/dev/null || true
+                log_success "Permisos actualizados"
+                
+                # Recrear symlinks
+                echo ""
+                log_info "Recreando enlaces simbólicos..."
+                
+                declare -A SYMLINKS=(
+                    ["$REPO_DIR/scripts/nea_tour.sh"]="/usr/local/bin/nea_tour"
+                    ["$REPO_DIR/scripts/nea_login.sh"]="/usr/local/bin/nea_login"
+                    ["$REPO_DIR/scripts/nea_wifi.sh"]="/usr/local/bin/nea_wifi"
+                    ["$REPO_DIR/scripts/nea_sync.sh"]="/usr/local/bin/nea_sync"
+                    ["$REPO_DIR/scripts/nea_restore.sh"]="/usr/local/bin/nea_restore"
+                    ["$REPO_DIR/scripts/nea_report.sh"]="/usr/local/bin/nea_report"
+                )
+                
+                local created_count=0
+                local missing_count=0
+                
+                for source in "${!SYMLINKS[@]}"; do
+                    target="${SYMLINKS[$source]}"
+                    
+                    # Remover symlink anterior si existe
+                    if [ -L "$target" ]; then
+                        rm "$target"
+                    fi
+                    
+                    if [ -f "$source" ]; then
+                        ln -sf "$source" "$target"
+                        log_success "Symlink creado: $(basename $target)"
+                        ((created_count++))
+                    else
+                        log_warning "Archivo faltante: $source"
+                        ((missing_count++))
+                    fi
+                done
+                
+                echo ""
+                log_success "Symlinks recreados: $created_count"
+                
+                if [ $missing_count -gt 0 ]; then
+                    log_warning "Archivos faltantes: $missing_count"
+                    echo ""
+                    log_info "Los archivos faltantes pueden:"
+                    echo "  • No estar disponibles aún en el repositorio"
+                    echo "  • Estar en desarrollo"
+                    echo "  • Requerir una versión más nueva del repositorio"
+                fi
+                
+                # Validar instalación
+                echo ""
+                log_info "Validando instalación..."
+                
+                local validation_ok=true
+                
+                # Verificar comandos disponibles
+                for cmd in nea_tour nea_login nea_wifi nea_sync; do
+                    if command -v $cmd &>/dev/null; then
+                        log_success "Comando disponible: $cmd"
+                    else
+                        log_warning "Comando no disponible: $cmd"
+                        validation_ok=false
+                    fi
+                done
+                
+                echo ""
+                if [ "$validation_ok" = true ]; then
+                    log_success "✓ Actualización completada exitosamente"
+                else
+                    log_warning "⚠ Actualización completada con advertencias"
+                    log_info "Algunos comandos pueden no estar disponibles aún"
+                fi
+                
+                echo ""
+                read -p "Presiona ENTER para continuar..."
+                
+            else
+                log_error "Repositorio no encontrado en $REPO_DIR"
+                log_info "Ejecuta la instalación completa primero"
+            fi
+            
+            exit 0
+            ;;
+        4)
             echo ""
             log_warning "Esto borrará todo el estado de instalación."
             if ask_yes_no "¿Está seguro?" "n"; then
@@ -244,7 +359,7 @@ if [ -f "$STATE_FILE" ]; then
                 exit 0
             fi
             ;;
-        4)
+        5)
             log_info "Saliendo..."
             exit 0
             ;;
@@ -383,6 +498,108 @@ else
     
     # Crear directorio de scripts si no existe
     mkdir -p "$REPO_DIR/scripts"
+    
+    # Validar integridad del repositorio
+    log_info "Validando archivos del repositorio..."
+    
+    # Lista de archivos requeridos
+    declare -A REQUIRED_FILES=(
+        ["$REPO_DIR/scripts/nea_tour.sh"]="Sistema de misiones interactivo"
+        ["$REPO_DIR/scripts/nea_login.sh"]="Script de login personalizado"
+        ["$REPO_DIR/scripts/nea_wifi.sh"]="Configurador de WiFi"
+        ["$REPO_DIR/scripts/nea_sync.sh"]="Sincronizador de datos"
+        ["$REPO_DIR/scripts/nea_restore.sh"]="Herramienta de restauración"
+        ["$REPO_DIR/scripts/nea_report.sh"]="Generador de reportes"
+    )
+    
+    # Lista de archivos opcionales pero recomendados
+    declare -A OPTIONAL_FILES=(
+        ["$REPO_DIR/README.md"]="Documentación principal"
+        ["$REPO_DIR/missions/nivel1/mision.json"]="Misión nivel 1"
+        ["$REPO_DIR/missions/nivel2/mision.json"]="Misión nivel 2"
+        ["$REPO_DIR/missions/nivel3/mision.json"]="Misión nivel 3"
+    )
+    
+    local missing_required=()
+    local missing_optional=()
+    
+    # Verificar archivos requeridos
+    for file in "${!REQUIRED_FILES[@]}"; do
+        if [ ! -f "$file" ]; then
+            missing_required+=("$file")
+            log_warning "Falta archivo requerido: ${REQUIRED_FILES[$file]} ($file)"
+        else
+            log_success "Encontrado: ${REQUIRED_FILES[$file]}"
+        fi
+    done
+    
+    # Verificar archivos opcionales
+    for file in "${!OPTIONAL_FILES[@]}"; do
+        if [ ! -f "$file" ]; then
+            missing_optional+=("$file")
+        fi
+    done
+    
+    # Reportar estado
+    echo ""
+    if [ ${#missing_required[@]} -gt 0 ]; then
+        log_error "Faltan ${#missing_required[@]} archivo(s) requerido(s)"
+        echo ""
+        log_info "Archivos faltantes:"
+        for file in "${missing_required[@]}"; do
+            echo "  - $file"
+        done
+        echo ""
+        
+        log_warning "OPCIONES:"
+        echo "  1) Estos archivos pueden no estar en el repositorio aún"
+        echo "  2) Se crearán automáticamente en futuras actualizaciones"
+        echo "  3) Puedes continuar, pero algunas funciones no estarán disponibles"
+        echo ""
+        
+        if ask_yes_no "¿Desea continuar de todas formas?" "y"; then
+            log_warning "Continuando con archivos faltantes..."
+            
+            # Crear stubs básicos para archivos críticos
+            log_info "Creando stubs para archivos faltantes..."
+            
+            for file in "${missing_required[@]}"; do
+                local dir=$(dirname "$file")
+                mkdir -p "$dir"
+                
+                # Crear stub básico
+                cat > "$file" << 'STUB_EOF'
+#!/bin/bash
+# Este archivo es un stub temporal creado por el instalador
+# Será reemplazado en futuras actualizaciones
+
+echo "Esta función aún no está disponible."
+echo "El archivo será actualizado automáticamente cuando esté disponible."
+exit 1
+STUB_EOF
+                chmod +x "$file"
+                log_success "Stub creado: $file"
+            done
+        else
+            log_error "Instalación cancelada por archivos faltantes."
+            echo ""
+            log_info "Soluciones posibles:"
+            echo "  1. Verifica que el repositorio esté actualizado"
+            echo "  2. Contacta al administrador del sistema"
+            echo "  3. Clona manualmente el repositorio completo"
+            exit 1
+        fi
+    else
+        log_success "Todos los archivos requeridos están presentes"
+    fi
+    
+    # Informar sobre archivos opcionales faltantes
+    if [ ${#missing_optional[@]} -gt 0 ]; then
+        log_info "Archivos opcionales no encontrados: ${#missing_optional[@]}"
+        log_info "Esto es normal si el repositorio está en desarrollo"
+    fi
+    
+    echo ""
     
     # Make all scripts executable
     chmod +x "$REPO_DIR"/*.sh 2>/dev/null || true
