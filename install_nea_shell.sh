@@ -381,11 +381,12 @@ else
         log_success "Repositorio actualizado"
     fi
     
-    chmod +x "$REPO_DIR"/*.sh 2>/dev/null || true
-    chmod +x "$REPO_DIR/scripts"/*.sh 2>/dev/null || true
-    
     # Crear directorio de scripts si no existe
     mkdir -p "$REPO_DIR/scripts"
+    
+    # Make all scripts executable
+    chmod +x "$REPO_DIR"/*.sh 2>/dev/null || true
+    chmod +x "$REPO_DIR/scripts"/*.sh 2>/dev/null || true
     
     # Enlaces simbólicos (verificar que existen antes de crear)
     declare -A SYMLINKS=(

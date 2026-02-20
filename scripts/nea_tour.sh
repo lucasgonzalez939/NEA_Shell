@@ -389,3 +389,327 @@ main() {
 if [ "${BASH_SOURCE[0]}" == "${0}" ]; then
     main "$@"
 fi
+
+# ==============================================================================
+# NEA TOUR SCRIPT
+# ==============================================================================
+
+# NEA Shell - Interactive Tutorial and Mission System
+# This script provides an engaging introduction to terminal commands
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+RED='\033[0;31m'
+MAGENTA='\033[0;35m'
+NC='\033[0m' # No Color
+
+# User data directory
+USER_DATA="$HOME/.nea_shell"
+PROGRESS_FILE="$USER_DATA/progress.json"
+MISSION_DIR="$HOME/missions"
+
+# Initialize user data
+init_user_data() {
+    mkdir -p "$USER_DATA"
+    
+    if [ ! -f "$PROGRESS_FILE" ]; then
+        cat > "$PROGRESS_FILE" << 'EOF'
+{
+  "level": 1,
+  "xp": 0,
+  "missions_completed": [],
+  "current_mission": "welcome",
+  "badges": [],
+  "last_login": ""
+}
+EOF
+    fi
+    
+    # Update last login
+    jq ".last_login = \"$(date '+%Y-%m-%d %H:%M:%S')\"" "$PROGRESS_FILE" > "${PROGRESS_FILE}.tmp" && mv "${PROGRESS_FILE}.tmp" "$PROGRESS_FILE"
+}
+
+# Display animated header
+show_header() {
+    clear
+    echo -e "${CYAN}"
+    cat << 'EOF'
+    ███╗   ██╗███████╗ █████╗     ████████╗ ██████╗ ██╗   ██╗██████╗ 
+    ████╗  ██║██╔════╝██╔══██╗    ╚══██╔══╝██╔═══██╗██║   ██║██╔══██╗
+    ██╔██╗ ██║█████╗  ███████║       ██║   ██║   ██║██║   ██║██████╔╝
+    ██║╚██╗██║██╔══╝  ██╔══██║       ██║   ██║   ██║██║   ██║██╔══██╗
+    ██║ ╚████║███████╗██║  ██║       ██║   ╚██████╔╝╚██████╔╝██║  ██║
+    ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝ ╚═╝  ╚═╝
+EOF
+    echo -e "${NC}"
+    echo -e "${BLUE}════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${YELLOW}          🚀 SISTEMA DE ENTRENAMIENTO EN TERMINAL 🚀${NC}"
+    echo -e "${BLUE}════════════════════════════════════════════════════════════════${NC}"
+    echo ""
+}
+
+# Show user stats
+show_stats() {
+    local level=$(jq -r '.level' "$PROGRESS_FILE")
+    local xp=$(jq -r '.xp' "$PROGRESS_FILE")
+    local next_level_xp=$((level * 100))
+    local missions_count=$(jq -r '.missions_completed | length' "$PROGRESS_FILE")
+    
+    echo -e "${CYAN}👤 AGENTE:${NC} $USER"
+    echo -e "${CYAN}⚡ NIVEL:${NC} $level"
+    echo -e "${CYAN}✨ XP:${NC} $xp / $next_level_xp"
+    echo -e "${CYAN}🏆 MISIONES COMPLETADAS:${NC} $missions_count"
+    echo ""
+}
+
+# Main menu
+show_menu() {
+    show_header
+    show_stats
+    
+    echo -e "${GREEN}¿Qué deseas hacer?${NC}"
+    echo ""
+    echo "  1) 📖 Comenzar tutorial básico"
+    echo "  2) 🎯 Ver misiones disponibles"
+    echo "  3) 📊 Ver mi progreso"
+    echo "  4) 🏅 Ver mis logros"
+    echo "  5) ❓ Ayuda"
+    echo "  6) 🚪 Salir"
+    echo ""
+    read -p "Selecciona una opción [1-6]: " choice
+    
+    case $choice in
+        1) start_tutorial ;;
+        2) show_missions ;;
+        3) show_progress ;;
+        4) show_badges ;;
+        5) show_help ;;
+        6) exit 0 ;;
+        *) echo -e "${RED}Opción inválida${NC}"; sleep 2; show_menu ;;
+    esac
+}
+
+# Tutorial básico
+start_tutorial() {
+    clear
+    echo -e "${YELLOW}╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${YELLOW}║          📖 TUTORIAL BÁSICO - MISIÓN 1               ║${NC}"
+    echo -e "${YELLOW}╚════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${CYAN}¡Bienvenido, Agente!${NC}"
+    echo ""
+    echo "Este tutorial te enseñará los comandos básicos de la terminal."
+    echo "Aprenderás a navegar, crear carpetas y archivos."
+    echo ""
+    read -p "Presiona ENTER para comenzar..."
+    
+    # Lección 1: pwd
+    clear
+    echo -e "${MAGENTA}═══ LECCIÓN 1: ¿DÓNDE ESTOY? ═══${NC}"
+    echo ""
+    echo "El comando 'pwd' (Print Working Directory) te muestra dónde estás."
+    echo ""
+    echo -e "${YELLOW}Escribe:${NC} pwd"
+    echo ""
+    
+    # Esperar a que el usuario escriba el comando correcto
+    while true; do
+        read -p "$ " cmd
+        if [ "$cmd" = "pwd" ]; then
+            pwd
+            echo ""
+            echo -e "${GREEN}✓ ¡Correcto!${NC} Este es tu directorio actual."
+            break
+        else
+            echo -e "${RED}✗ Intenta de nuevo. Escribe exactamente: pwd${NC}"
+        fi
+    done
+    
+    echo ""
+    read -p "Presiona ENTER para continuar..."
+    
+    # Lección 2: ls
+    clear
+    echo -e "${MAGENTA}═══ LECCIÓN 2: ¿QUÉ HAY AQUÍ? ═══${NC}"
+    echo ""
+    echo "El comando 'ls' (list) muestra el contenido de una carpeta."
+    echo ""
+    echo -e "${YELLOW}Escribe:${NC} ls"
+    echo ""
+    
+    while true; do
+        read -p "$ " cmd
+        if [ "$cmd" = "ls" ]; then
+            ls --color=auto
+            echo ""
+            echo -e "${GREEN}✓ ¡Excelente!${NC} Estos son tus archivos y carpetas."
+            break
+        else
+            echo -e "${RED}✗ Intenta de nuevo. Escribe: ls${NC}"
+        fi
+    done
+    
+    echo ""
+    read -p "Presiona ENTER para continuar..."
+    
+    # Lección 3: mkdir
+    clear
+    echo -e "${MAGENTA}═══ LECCIÓN 3: CREAR CARPETAS ═══${NC}"
+    echo ""
+    echo "El comando 'mkdir' (make directory) crea una carpeta nueva."
+    echo ""
+    echo -e "${YELLOW}Escribe:${NC} mkdir mi_primera_carpeta"
+    echo ""
+    
+    while true; do
+        read -p "$ " cmd
+        if [ "$cmd" = "mkdir mi_primera_carpeta" ]; then
+            mkdir -p mi_primera_carpeta
+            echo ""
+            echo -e "${GREEN}✓ ¡Carpeta creada!${NC}"
+            echo ""
+            echo "Verifica que existe escribiendo: ls"
+            ls --color=auto
+            break
+        else
+            echo -e "${RED}✗ Intenta de nuevo. Escribe: mkdir mi_primera_carpeta${NC}"
+        fi
+    done
+    
+    echo ""
+    read -p "Presiona ENTER para continuar..."
+    
+    # Completar misión
+    add_xp 50
+    complete_mission "tutorial_basic"
+    
+    clear
+    echo -e "${GREEN}╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║          🎉 ¡MISIÓN COMPLETADA! 🎉                   ║${NC}"
+    echo -e "${GREEN}╚════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${YELLOW}Has ganado 50 XP${NC}"
+    echo ""
+    echo "¡Felicitaciones! Has completado el tutorial básico."
+    echo ""
+    read -p "Presiona ENTER para volver al menú..."
+    show_menu
+}
+
+# Mostrar misiones disponibles
+show_missions() {
+    clear
+    echo -e "${YELLOW}╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${YELLOW}║              🎯 MISIONES DISPONIBLES                  ║${NC}"
+    echo -e "${YELLOW}╚════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    
+    echo -e "${CYAN}Misiones de Nivel 1:${NC}"
+    echo "  [ ] Tutorial Básico (50 XP)"
+    echo "  [ ] Navegación de Archivos (75 XP)"
+    echo "  [ ] Crear tu Primera Historia (100 XP)"
+    echo ""
+    
+    echo -e "${CYAN}Próximamente:${NC}"
+    echo "  [🔒] Misiones de Nivel 2 (desbloquear en nivel 2)"
+    echo ""
+    
+    read -p "Presiona ENTER para volver..."
+    show_menu
+}
+
+# Mostrar progreso
+show_progress() {
+    clear
+    show_header
+    show_stats
+    
+    echo -e "${CYAN}Misiones completadas:${NC}"
+    jq -r '.missions_completed[]' "$PROGRESS_FILE" 2>/dev/null || echo "  Ninguna aún"
+    echo ""
+    
+    read -p "Presiona ENTER para volver..."
+    show_menu
+}
+
+# Mostrar logros
+show_badges() {
+    clear
+    echo -e "${YELLOW}╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${YELLOW}║                🏅 TUS LOGROS                         ║${NC}"
+    echo -e "${YELLOW}╚════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    
+    local badges=$(jq -r '.badges[]' "$PROGRESS_FILE" 2>/dev/null)
+    
+    if [ -z "$badges" ]; then
+        echo "  Aún no has desbloqueado ningún logro."
+        echo ""
+        echo "  ¡Completa misiones para ganar logros!"
+    else
+        echo "$badges"
+    fi
+    
+    echo ""
+    read -p "Presiona ENTER para volver..."
+    show_menu
+}
+
+# Ayuda
+show_help() {
+    clear
+    echo -e "${CYAN}╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║                  ❓ AYUDA                            ║${NC}"
+    echo -e "${CYAN}╚════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${YELLOW}Comandos básicos de la terminal:${NC}"
+    echo ""
+    echo "  pwd       - Muestra dónde estás"
+    echo "  ls        - Lista archivos y carpetas"
+    echo "  cd        - Cambia de carpeta"
+    echo "  mkdir     - Crea una carpeta"
+    echo "  touch     - Crea un archivo vacío"
+    echo "  cat       - Muestra el contenido de un archivo"
+    echo "  clear     - Limpia la pantalla"
+    echo ""
+    echo -e "${YELLOW}Comandos de NEA Shell:${NC}"
+    echo ""
+    echo "  nea_tour  - Abre este menú"
+    echo "  nea_wifi  - Configura WiFi"
+    echo ""
+    read -p "Presiona ENTER para volver..."
+    show_menu
+}
+
+# Agregar XP
+add_xp() {
+    local xp_gain=$1
+    local current_xp=$(jq -r '.xp' "$PROGRESS_FILE")
+    local current_level=$(jq -r '.level' "$PROGRESS_FILE")
+    local new_xp=$((current_xp + xp_gain))
+    local next_level_xp=$((current_level * 100))
+    
+    # Actualizar XP
+    jq ".xp = $new_xp" "$PROGRESS_FILE" > "${PROGRESS_FILE}.tmp" && mv "${PROGRESS_FILE}.tmp" "$PROGRESS_FILE"
+    
+    # Verificar level up
+    if [ $new_xp -ge $next_level_xp ]; then
+        local new_level=$((current_level + 1))
+        jq ".level = $new_level | .xp = 0" "$PROGRESS_FILE" > "${PROGRESS_FILE}.tmp" && mv "${PROGRESS_FILE}.tmp" "$PROGRESS_FILE"
+        
+        echo -e "${YELLOW}🎊 ¡SUBISTE DE NIVEL! Ahora eres nivel $new_level${NC}"
+    fi
+}
+
+# Completar misión
+complete_mission() {
+    local mission_id=$1
+    jq ".missions_completed += [\"$mission_id\"]" "$PROGRESS_FILE" > "${PROGRESS_FILE}.tmp" && mv "${PROGRESS_FILE}.tmp" "$PROGRESS_FILE"
+}
+
+# Main
+init_user_data
+show_menu
